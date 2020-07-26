@@ -6,9 +6,9 @@ namespace DistributedLockPoc
     using System.Threading.Tasks;
     using Cassandra;
 
-    public class DistributedLockManager : IDistributedLockManager
+    public class CassandraLockManager : IDistributedLockManager
     {
-        private const string DistributedLocksTable = "distributed_locks";
+        private const string LocksTable = "distributed_locks";
 
         private static readonly SemaphoreSlim initializationSemaphore = new SemaphoreSlim(1);
 
@@ -19,7 +19,7 @@ namespace DistributedLockPoc
         private PreparedStatement upsertStatement;
         private PreparedStatement deleteStatement;
 
-        public DistributedLockManager(ISession session)
+        public CassandraLockManager(ISession session)
         {
             this.session = session;
         }
@@ -86,7 +86,7 @@ namespace DistributedLockPoc
                 }
 
                 await this.session.ExecuteAsync(new SimpleStatement(
-                    $"CREATE TABLE IF NOT EXISTS {DistributedLocksTable} (" +
+                    $"CREATE TABLE IF NOT EXISTS {LocksTable} (" +
                         "lock_key text," +
                         "lock_id uuid," +
                         "PRIMARY KEY ((lock_key))" +
@@ -108,7 +108,7 @@ namespace DistributedLockPoc
             }
 
             upsertStatement = await this.session.PrepareAsync(
-                $"INSERT INTO {DistributedLocksTable} (lock_key, lock_id) VALUES (?, ?) IF NOT EXISTS USING TTL ?;");
+                $"INSERT INTO {LocksTable} (lock_key, lock_id) VALUES (?, ?) IF NOT EXISTS USING TTL ?;");
 
             return upsertStatement;
         }
@@ -121,7 +121,7 @@ namespace DistributedLockPoc
             }
 
             deleteStatement = await this.session.PrepareAsync(
-                $"DELETE FROM {DistributedLocksTable} WHERE lock_key = ? IF lock_id = ?;");
+                $"DELETE FROM {LocksTable} WHERE lock_key = ? IF lock_id = ?;");
 
             return deleteStatement;
         }

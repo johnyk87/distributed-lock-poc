@@ -36,7 +36,7 @@
 
             try
             {
-                var lockManager = new DistributedLockManager(session);
+                var lockManager = new CassandraLockManager(session);
 
                 Console.WriteLine($"Acquiring {MyLockKey}");
                 var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
