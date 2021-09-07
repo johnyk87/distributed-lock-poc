@@ -22,12 +22,13 @@ namespace DistributedLockPoc
 
         public async ValueTask DisposeAsync()
         {
-            if (disposed)
+            if (this.disposed)
             {
                 return;
             }
 
             await this.lockManager.ReleaseAsync(this);
+            this.disposed = true;
         }
     }
 }

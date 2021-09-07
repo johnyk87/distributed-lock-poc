@@ -31,14 +31,14 @@ namespace DistributedLockPoc
 
             var lockId = Guid.NewGuid();
 
+            var preparedStatement = await this.GetUpsertPreparedStatementAsync();
+            var boundStatement = preparedStatement.Bind(lockKey, lockId, (int)lockTtl.TotalSeconds);
+
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var preparedStatement = await this.GetUpsertPreparedStatementAsync();
-
-                var rowSet = await session.ExecuteAsync(
-                    preparedStatement.Bind(lockKey, lockId, (int)lockTtl.TotalSeconds));
+                var rowSet = await session.ExecuteAsync(boundStatement);
 
                 if (IsApplied(rowSet))
                 {
