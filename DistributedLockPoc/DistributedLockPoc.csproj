@@ -6,11 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CassandraCSharpDriver" Version="3.15.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../LockDotNet/LockDotNet.csproj" />
     <ProjectReference Include="../LockDotNet.Cassandra/LockDotNet.Cassandra.csproj" />
   </ItemGroup>
 

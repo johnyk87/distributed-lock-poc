@@ -9,11 +9,11 @@ namespace LockDotNet.Cassandra
 
     public class CassandraLockSource : ILockSource
     {
-        private const string LocksTable = "distributed_locks";
+        private const string LocksTable = "locks";
 
-        private static readonly SemaphoreSlim initializationSemaphore = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim initializationSemaphore = new SemaphoreSlim(1);
 
-        private static bool isInitialized = false;
+        private bool isInitialized = false;
 
         private readonly ISession session;
 
@@ -22,7 +22,7 @@ namespace LockDotNet.Cassandra
 
         public CassandraLockSource(ISession session)
         {
-            this.session = session;
+            this.session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
         public async Task<Lock> AcquireAsync(
@@ -39,7 +39,7 @@ namespace LockDotNet.Cassandra
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var rowSet = await session.ExecuteAsync(boundStatement);
+                var rowSet = await this.session.ExecuteAsync(boundStatement);
 
                 if (IsApplied(rowSet))
                 {
@@ -60,16 +60,16 @@ namespace LockDotNet.Cassandra
 
         private async Task InitializeAsync()
         {
-            if (isInitialized)
+            if (this.isInitialized)
             {
                 return;
             }
 
-            await initializationSemaphore.WaitAsync();
+            await this.initializationSemaphore.WaitAsync();
 
             try
             {
-                if (isInitialized)
+                if (this.isInitialized)
                 {
                     return;
                 }
@@ -81,11 +81,11 @@ namespace LockDotNet.Cassandra
                         "PRIMARY KEY ((lock_key))" +
                     ");"));
 
-                isInitialized = true;
+                this.isInitialized = true;
             }
             finally
             {
-                initializationSemaphore.Release();
+                this.initializationSemaphore.Release();
             }
         }
 
@@ -93,7 +93,7 @@ namespace LockDotNet.Cassandra
         {
             var preparedStatement = await this.GetDeletePreparedStatementAsync();
 
-            await session.ExecuteAsync(preparedStatement.Bind(@lock.Key, @lock.Id));
+            await this.session.ExecuteAsync(preparedStatement.Bind(@lock.Key, @lock.Id));
         }
 
         private async ValueTask<PreparedStatement> GetUpsertPreparedStatementAsync()

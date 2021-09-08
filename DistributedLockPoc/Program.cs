@@ -9,7 +9,7 @@
 
     public static class Program
     {
-        private const string DistributedLocksTable = "distributed_locks";
+        private const string LocksTable = "locks";
         private const string MyLockKey = "my_lock";
         private const string AnotherLockKey = "another_lock";
 
@@ -122,7 +122,7 @@
         {
             Console.WriteLine();
 
-            var rowSet = await session.ExecuteAsync(new SimpleStatement($"SELECT * FROM {DistributedLocksTable}"));
+            var rowSet = await session.ExecuteAsync(new SimpleStatement($"SELECT * FROM {LocksTable}"));
 
             var isFirst = true;
             foreach (var column in rowSet.Columns)
