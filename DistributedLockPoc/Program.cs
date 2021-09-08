@@ -4,6 +4,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Cassandra;
+    using LockDotNet;
+    using LockDotNet.Cassandra;
 
     public static class Program
     {

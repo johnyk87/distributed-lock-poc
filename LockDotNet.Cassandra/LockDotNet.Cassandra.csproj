@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>LockDotNet.Cassandra</RootNamespace>
+    <AssemblyName>LockDotNet.Cassandra</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../LockDotNet/LockDotNet.csproj" />
-    <ProjectReference Include="../LockDotNet.Cassandra/LockDotNet.Cassandra.csproj" />
   </ItemGroup>
 
 </Project>

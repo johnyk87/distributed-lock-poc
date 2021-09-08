@@ -1,10 +1,11 @@
-namespace DistributedLockPoc
+namespace LockDotNet.Cassandra
 {
     using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Cassandra;
+    using global::Cassandra;
+    using LockDotNet;
 
     public class CassandraLockSource : ILockSource
     {

@@ -1,4 +1,4 @@
-namespace DistributedLockPoc
+namespace LockDotNet
 {
     using System;
     using System.Threading.Tasks;
