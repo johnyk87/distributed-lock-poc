@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../LockDotNet.Cassandra/LockDotNet.Cassandra.csproj" />
+    <ProjectReference Include="../LockDotNet.Tests/LockDotNet.Tests.csproj" />
   </ItemGroup>
 
 </Project>

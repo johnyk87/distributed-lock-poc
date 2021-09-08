@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Cassandra", "Loc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Tests", "LockDotNet.Tests\LockDotNet.Tests.csproj", "{BF09A061-16CF-4155-9665-1487FD32FD8E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Cassandra.Tests", "LockDotNet.Cassandra.Tests\LockDotNet.Cassandra.Tests.csproj", "{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,5 +60,17 @@ Global
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Release|x64.Build.0 = Release|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Release|x86.Build.0 = Release|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|x64.Build.0 = Debug|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|x86.Build.0 = Debug|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Release|x64.ActiveCfg = Release|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Release|x64.Build.0 = Release|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Release|x86.ActiveCfg = Release|Any CPU
+		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
