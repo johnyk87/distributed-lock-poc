@@ -12,7 +12,6 @@
         private const string AnotherLockKey = "another_lock";
 
         private static readonly TimeSpan LockTtl = TimeSpan.FromSeconds(10);
-        private static readonly TimeSpan LockRetryInterval = TimeSpan.FromMilliseconds(50);
 
         public static async Task Main()
         {
@@ -36,12 +35,12 @@
 
             try
             {
-                var lockManager = new CassandraLockManager(session);
+                var lockSource = (ILockSource)new CassandraLockSource(session);
 
                 Console.WriteLine($"Acquiring {MyLockKey}");
                 var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
                 await using (var myLock =
-                    await lockManager.AcquireAsync(MyLockKey, LockTtl, LockRetryInterval, cts.Token))
+                    await lockSource.AcquireAsync(MyLockKey, LockTtl, cts.Token))
                 {
                     Console.WriteLine($"{myLock.Key} acquired: {myLock.Id}");
 
@@ -50,7 +49,7 @@
                     Console.WriteLine($"Acquiring {AnotherLockKey}");
                     cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
                     await using (var anotherLock =
-                        await lockManager.AcquireAsync(AnotherLockKey, LockTtl, LockRetryInterval, cts.Token))
+                        await lockSource.AcquireAsync(AnotherLockKey, LockTtl, cts.Token))
                     {
                         Console.WriteLine($"{anotherLock.Key} acquired: {anotherLock.Id}");
 
@@ -64,7 +63,7 @@
                     Console.WriteLine($"Acquiring {AnotherLockKey} again");
                     cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
                     await using (var anotherLock =
-                        await lockManager.AcquireAsync(AnotherLockKey, LockTtl, LockRetryInterval, cts.Token))
+                        await lockSource.AcquireAsync(AnotherLockKey, LockTtl, cts.Token))
                     {
                         Console.WriteLine($"{anotherLock.Key} acquired: {anotherLock.Id}");
 
@@ -78,7 +77,7 @@
                     Console.WriteLine($"Acquiring {MyLockKey} again");
                     cts = new CancellationTokenSource(LockTtl + TimeSpan.FromSeconds(1));
                     await using (var secondMyLock =
-                        await lockManager.AcquireAsync(MyLockKey, LockTtl, LockRetryInterval, cts.Token))
+                        await lockSource.AcquireAsync(MyLockKey, LockTtl, cts.Token))
                     {
                         Console.WriteLine($"{secondMyLock.Key} acquired: {secondMyLock.Id}");
 

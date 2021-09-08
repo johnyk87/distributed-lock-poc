@@ -6,7 +6,7 @@ namespace DistributedLockPoc
     using System.Threading.Tasks;
     using Cassandra;
 
-    public class CassandraLockManager : IDistributedLockManager
+    public class CassandraLockSource : ILockSource
     {
         private const string LocksTable = "distributed_locks";
 
@@ -19,13 +19,13 @@ namespace DistributedLockPoc
         private PreparedStatement upsertStatement;
         private PreparedStatement deleteStatement;
 
-        public CassandraLockManager(ISession session)
+        public CassandraLockSource(ISession session)
         {
             this.session = session;
         }
 
-        public async Task<DistributedLock> AcquireAsync(
-            string lockKey, TimeSpan lockTtl, TimeSpan retryInterval, CancellationToken cancellationToken = default)
+        public async Task<Lock> AcquireAsync(
+            string lockKey, TimeSpan lockTtl, CancellationToken cancellationToken = default)
         {
             await this.InitializeAsync();
 
@@ -45,23 +45,11 @@ namespace DistributedLockPoc
                     break;
                 }
 
-                await Task.Delay(retryInterval, cancellationToken);
+                await Task.Delay(10, cancellationToken);
             }
             while(true);
 
-            return new DistributedLock(this, lockKey, lockId);
-        }
-
-        public async Task<bool> ReleaseAsync(DistributedLock distributedLock)
-        {
-            await this.InitializeAsync();
-
-            var preparedStatement = await this.GetDeletePreparedStatementAsync();
-
-            var rowSet = await session.ExecuteAsync(
-                preparedStatement.Bind(distributedLock.Key, distributedLock.Id));
-            
-            return IsApplied(rowSet);
+            return new Lock(lockKey, lockId, @lock => this.ReleaseAsync(@lock));
         }
 
         private static bool IsApplied(RowSet rowSet)
@@ -100,30 +88,37 @@ namespace DistributedLockPoc
             }
         }
 
+        private async Task ReleaseAsync(Lock @lock)
+        {
+            var preparedStatement = await this.GetDeletePreparedStatementAsync();
+
+            await session.ExecuteAsync(preparedStatement.Bind(@lock.Key, @lock.Id));
+        }
+
         private async ValueTask<PreparedStatement> GetUpsertPreparedStatementAsync()
         {
-            if (upsertStatement != null)
+            if (this.upsertStatement != null)
             {
-                return upsertStatement;
+                return this.upsertStatement;
             }
 
-            upsertStatement = await this.session.PrepareAsync(
+            this.upsertStatement = await this.session.PrepareAsync(
                 $"INSERT INTO {LocksTable} (lock_key, lock_id) VALUES (?, ?) IF NOT EXISTS USING TTL ?;");
 
-            return upsertStatement;
+            return this.upsertStatement;
         }
 
         private async ValueTask<PreparedStatement> GetDeletePreparedStatementAsync()
         {
-            if (deleteStatement != null)
+            if (this.deleteStatement != null)
             {
-                return deleteStatement;
+                return this.deleteStatement;
             }
 
-            deleteStatement = await this.session.PrepareAsync(
+            this.deleteStatement = await this.session.PrepareAsync(
                 $"DELETE FROM {LocksTable} WHERE lock_key = ? IF lock_id = ?;");
 
-            return deleteStatement;
+            return this.deleteStatement;
         }
     }
 }
