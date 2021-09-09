@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet", "LockDotNet\LockDotNet.csproj", "{36A2407A-0D71-41DC-B122-6ECE5F6C52AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet", "src\LockDotNet\LockDotNet.csproj", "{36A2407A-0D71-41DC-B122-6ECE5F6C52AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Cassandra", "LockDotNet.Cassandra\LockDotNet.Cassandra.csproj", "{81E6A6F4-87BC-4971-882B-2167E0E81FD8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Tests", "tests\LockDotNet.Tests\LockDotNet.Tests.csproj", "{BF09A061-16CF-4155-9665-1487FD32FD8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Tests", "LockDotNet.Tests\LockDotNet.Tests.csproj", "{BF09A061-16CF-4155-9665-1487FD32FD8E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Cassandra", "src\LockDotNet.Cassandra\LockDotNet.Cassandra.csproj", "{81E6A6F4-87BC-4971-882B-2167E0E81FD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Cassandra.Tests", "LockDotNet.Cassandra.Tests\LockDotNet.Cassandra.Tests.csproj", "{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.Cassandra.Tests", "tests\LockDotNet.Cassandra.Tests\LockDotNet.Cassandra.Tests.csproj", "{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.MongoDb", "LockDotNet.MongoDb\LockDotNet.MongoDb.csproj", "{1867CC56-425E-485C-8F82-CAB3C128230B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.MongoDb", "src\LockDotNet.MongoDb\LockDotNet.MongoDb.csproj", "{1867CC56-425E-485C-8F82-CAB3C128230B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.MongoDb.Tests", "LockDotNet.MongoDb.Tests\LockDotNet.MongoDb.Tests.csproj", "{17EA6D0E-F038-49BE-AA3D-BB2BECDEB5DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDotNet.MongoDb.Tests", "tests\LockDotNet.MongoDb.Tests\LockDotNet.MongoDb.Tests.csproj", "{17EA6D0E-F038-49BE-AA3D-BB2BECDEB5DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,18 +40,6 @@ Global
 		{36A2407A-0D71-41DC-B122-6ECE5F6C52AF}.Release|x64.Build.0 = Release|Any CPU
 		{36A2407A-0D71-41DC-B122-6ECE5F6C52AF}.Release|x86.ActiveCfg = Release|Any CPU
 		{36A2407A-0D71-41DC-B122-6ECE5F6C52AF}.Release|x86.Build.0 = Release|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x64.Build.0 = Debug|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x86.Build.0 = Debug|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x64.ActiveCfg = Release|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x64.Build.0 = Release|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x86.ActiveCfg = Release|Any CPU
-		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x86.Build.0 = Release|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -64,6 +52,18 @@ Global
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Release|x64.Build.0 = Release|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Release|x86.ActiveCfg = Release|Any CPU
 		{BF09A061-16CF-4155-9665-1487FD32FD8E}.Release|x86.Build.0 = Release|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x64.Build.0 = Debug|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Debug|x86.Build.0 = Debug|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x64.ActiveCfg = Release|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x64.Build.0 = Release|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x86.ActiveCfg = Release|Any CPU
+		{81E6A6F4-87BC-4971-882B-2167E0E81FD8}.Release|x86.Build.0 = Release|Any CPU
 		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5C5AFB2-3CAA-4D67-BD97-AFC22EF79C5E}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>LockDotNet.Tests</RootNamespace>
-    <AssemblyName>LockDotNet.Tests</AssemblyName>
+    <RootNamespace>LockDotNet.MongoDb.Tests</RootNamespace>
+    <AssemblyName>LockDotNet.MongoDb.Tests</AssemblyName>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../LockDotNet/LockDotNet.csproj" />
+    <ProjectReference Include="../LockDotNet.Tests/LockDotNet.Tests.csproj" />
+    <ProjectReference Include="../../src/LockDotNet.MongoDb/LockDotNet.MongoDb.csproj" />
   </ItemGroup>
 
 </Project>

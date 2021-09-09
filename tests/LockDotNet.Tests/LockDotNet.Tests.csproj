@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>LockDotNet.Cassandra.Tests</RootNamespace>
-    <AssemblyName>LockDotNet.Cassandra.Tests</AssemblyName>
+    <RootNamespace>LockDotNet.Tests</RootNamespace>
+    <AssemblyName>LockDotNet.Tests</AssemblyName>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -16,8 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../LockDotNet.Cassandra/LockDotNet.Cassandra.csproj" />
-    <ProjectReference Include="../LockDotNet.Tests/LockDotNet.Tests.csproj" />
+    <ProjectReference Include="../../src/LockDotNet/LockDotNet.csproj" />
   </ItemGroup>
 
 </Project>
