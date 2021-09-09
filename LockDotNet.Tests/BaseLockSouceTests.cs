@@ -34,7 +34,7 @@ namespace LockDotNet.Tests
             Assert.Equal(lockKey, @lock.Key);
             Assert.NotEqual(Guid.Empty, @lock.Id);
 
-            Assert.True(await this.LockExistsAsync(@lock));
+            await this.AssertLockExistsAsync(@lock);
         }
 
         [Fact]
@@ -46,13 +46,15 @@ namespace LockDotNet.Tests
             // Act
             var secondLockTask = this.LockSource.AcquireAsync(@firstLock.Key, DefaultTtl);
             await Task.Delay(TimeSpan.FromMilliseconds(100));
-            Assert.False(secondLockTask.IsCompleted);
+            Assert.False(
+                secondLockTask.IsCompleted,
+                $"Expected acquire task to still be running, but it is complete with a status of {secondLockTask.Status}.");
 
             await @firstLock.DisposeAsync();
             var @secondLock = await secondLockTask;
 
             // Assert
-            Assert.True(await this.LockExistsAsync(@secondLock));
+            await this.AssertLockExistsAsync(@secondLock);
         }
 
         [Fact]
@@ -63,7 +65,7 @@ namespace LockDotNet.Tests
             await Task.Delay(ShortTtl + TimeSpan.FromMilliseconds(100));
 
             // Assert
-            Assert.False(await this.LockExistsAsync(@lock));
+            await this.AssertLockDoesNotExistAsync(@lock);
         }
 
         [Fact]
@@ -74,8 +76,8 @@ namespace LockDotNet.Tests
             await using var @secondLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
 
             // Assert
-            Assert.True(await this.LockExistsAsync(@firstLock));
-            Assert.True(await this.LockExistsAsync(@secondLock));
+            await this.AssertLockExistsAsync(@firstLock);
+            await this.AssertLockExistsAsync(@secondLock);
         }
 
         [Fact]
@@ -91,11 +93,11 @@ namespace LockDotNet.Tests
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(key, DefaultTtl, cts.Token));
 
             // Assert
-            Assert.False(await this.LockExistsAsync(key));
+            await this.AssertLockDoesNotExistAsync(key);
         }
 
         [Fact]
-        public async Task AcquireAsync_CancellingWhileWaitingForExistingToken_ThrowsOperationCanceledExceptionAndExistingLockSurvives()
+        public async Task AcquireAsync_CancellingWhileWaitingForExistingLockToBeReleased_ThrowsOperationCanceledExceptionAndExistingLockSurvives()
         {
             // Arrange
             await using var @firstLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
@@ -106,7 +108,7 @@ namespace LockDotNet.Tests
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(@firstLock.Key, DefaultTtl, cts.Token));
 
             // Assert
-            Assert.True(await this.LockExistsAsync(@firstLock));
+            await this.AssertLockExistsAsync(@firstLock);
         }
 
         [Fact]
@@ -119,7 +121,7 @@ namespace LockDotNet.Tests
             await @lock.DisposeAsync();
 
             // Assert
-            Assert.False(await this.LockExistsAsync(@lock));
+            await this.AssertLockDoesNotExistAsync(@lock);
         }
 
         [Fact]
@@ -128,13 +130,12 @@ namespace LockDotNet.Tests
             // Arrange
             var @lock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
             await Task.Delay(ShortTtl + TimeSpan.FromMilliseconds(100));
-            Assert.False(await this.LockExistsAsync(@lock));
 
             // Act
             await @lock.DisposeAsync();
 
             // Assert
-            Assert.False(await this.LockExistsAsync(@lock));
+            await this.AssertLockDoesNotExistAsync(@lock);
         }
 
         [Fact]
@@ -143,14 +144,13 @@ namespace LockDotNet.Tests
             // Arrange
             var @firstLock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
             await using var @secondLock = await this.LockSource.AcquireAsync(@firstLock.Key, DefaultTtl);
-            Assert.False(await this.LockExistsAsync(@firstLock));
 
             // Act
             await @firstLock.DisposeAsync();
 
             // Assert
-            Assert.False(await this.LockExistsAsync(@firstLock));
-            Assert.True(await this.LockExistsAsync(@secondLock));
+            await this.AssertLockDoesNotExistAsync(@firstLock);
+            await this.AssertLockExistsAsync(@secondLock);
         }
         
         protected abstract Task<bool> LockExistsAsync(string key, Guid? id = null);
@@ -158,6 +158,27 @@ namespace LockDotNet.Tests
         private Task<bool> LockExistsAsync(Lock @lock)
         {
             return LockExistsAsync(@lock.Key, @lock.Id);
+        }
+
+        private async Task AssertLockExistsAsync(Lock @lock, string customMessage = null)
+        {
+            Assert.True(
+                await this.LockExistsAsync(@lock),
+                customMessage ?? $"Expected lock {{ Key = {@lock.Key}, Id = {@lock.Id}}} to exist, but it was not found.");
+        }
+
+        private async Task AssertLockDoesNotExistAsync(string key, string customMessage = null)
+        {
+            Assert.False(
+                await this.LockExistsAsync(key),
+                customMessage ?? $"Did not expect locks with key = {key} to exist, but at least one lock with that key was found.");
+        }
+
+        private async Task AssertLockDoesNotExistAsync(Lock @lock, string customMessage = null)
+        {
+            Assert.False(
+                await this.LockExistsAsync(@lock),
+                customMessage ?? $"Did not expect lock {{ Key = {@lock.Key}, Id = {@lock.Id}}} to exist, but it was found.");
         }
     }
 }
