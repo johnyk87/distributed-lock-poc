@@ -21,63 +21,60 @@ namespace LockDotNet.Tests
         protected ILockSource LockSource { get; }
 
         [Fact]
-        public async Task AcquireAsync_WithNoLockForTheSameKey_AcquiresLock()
+        public async Task AcquireAsync_WithNoLockForTheSameKey_ReturnsValidLockInstance()
         {
             // Arrange
             var lockKey = RandomKey;
 
             // Act
-            await using var @lock = await this.LockSource.AcquireAsync(lockKey, DefaultTtl);
+            await using var acquiredLock = await this.LockSource.AcquireAsync(lockKey, DefaultTtl);
 
             // Assert
-            Assert.NotNull(@lock);
-            Assert.Equal(lockKey, @lock.Key);
-            Assert.NotEqual(Guid.Empty, @lock.Id);
+            Assert.NotNull(acquiredLock);
+            Assert.Equal(lockKey, acquiredLock.Key);
+            Assert.NotEqual(Guid.Empty, acquiredLock.Id);
+        }
 
-            await this.AssertLockExistsAsync(@lock);
+        [Fact]
+        public async Task AcquireAsync_WithNoLockForTheSameKey_LockIsCreated()
+        {
+            // Act
+            await using var acquiredLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+
+            // Assert
+            await this.AssertLockExistsAsync(acquiredLock);
         }
 
         [Fact]
         public async Task AcquireAsync_WithExistingLockForTheSameKey_AcquiresLockAfterExistingLockIsReleased()
         {
             // Arrange
-            var @firstLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+            var existingLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
 
             // Act
-            var secondLockTask = this.LockSource.AcquireAsync(@firstLock.Key, DefaultTtl);
+            var acquireLockTask = this.LockSource.AcquireAsync(existingLock.Key, DefaultTtl);
             await Task.Delay(TimeSpan.FromMilliseconds(100));
             Assert.False(
-                secondLockTask.IsCompleted,
-                $"Expected acquire task to still be running, but it is complete with a status of {secondLockTask.Status}.");
+                acquireLockTask.IsCompleted,
+                $"Expected acquire task to still be running, but it is complete with a status of {acquireLockTask.Status}.");
 
-            await @firstLock.DisposeAsync();
-            var @secondLock = await secondLockTask;
-
-            // Assert
-            await this.AssertLockExistsAsync(@secondLock);
-        }
-
-        [Fact]
-        public async Task AcquireAsync_AfterTtlExpired_LockNoLongerExists()
-        {
-            // Act
-            var @lock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
-            await Task.Delay(ShortTtl + TimeSpan.FromMilliseconds(100));
+            await existingLock.DisposeAsync();
+            var acquiredLock = await acquireLockTask;
 
             // Assert
-            await this.AssertLockDoesNotExistAsync(@lock);
+            await this.AssertLockExistsAsync(acquiredLock);
         }
 
         [Fact]
         public async Task AcquireAsync_WithTwoLocksWithDistinctKeys_BothLocksAreAcquired()
         {
             // Act
-            await using var @firstLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
-            await using var @secondLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+            await using var acquiredLock1 = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+            await using var acquiredLock2 = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
 
             // Assert
-            await this.AssertLockExistsAsync(@firstLock);
-            await this.AssertLockExistsAsync(@secondLock);
+            await this.AssertLockExistsAsync(acquiredLock1);
+            await this.AssertLockExistsAsync(acquiredLock2);
         }
 
         [Fact]
@@ -100,57 +97,66 @@ namespace LockDotNet.Tests
         public async Task AcquireAsync_CancellingWhileWaitingForExistingLockToBeReleased_ThrowsOperationCanceledExceptionAndExistingLockSurvives()
         {
             // Arrange
-            await using var @firstLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+            await using var existingLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
             // Act
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(@firstLock.Key, DefaultTtl, cts.Token));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(existingLock.Key, DefaultTtl, cts.Token));
 
             // Assert
-            await this.AssertLockExistsAsync(@firstLock);
+            await this.AssertLockExistsAsync(existingLock);
         }
 
         [Fact]
         public async Task Lock_WhenDisposing_ReleasesLock()
         {
             // Arrange
-            var @lock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+            var acquiredLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
 
             // Act
-            await @lock.DisposeAsync();
+            await acquiredLock.DisposeAsync();
 
             // Assert
-            await this.AssertLockDoesNotExistAsync(@lock);
+            await this.AssertLockDoesNotExistAsync(acquiredLock);
+        }
+
+        [Fact]
+        public async Task Lock_AfterItExpires_LockNoLongerExists()
+        {
+            // Act
+            var expiredLock = await this.SetupExpiredLockAsync();
+
+            // Assert
+            await this.AssertLockDoesNotExistAsync(expiredLock);
         }
 
         [Fact]
         public async Task Lock_WhenDisposingAfterLockExpired_DoesNothing()
         {
             // Arrange
-            var @lock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
-            await Task.Delay(ShortTtl + TimeSpan.FromMilliseconds(100));
+            var expiredLock = await this.SetupExpiredLockAsync();
 
             // Act
-            await @lock.DisposeAsync();
+            await expiredLock.DisposeAsync();
 
             // Assert
-            await this.AssertLockDoesNotExistAsync(@lock);
+            await this.AssertLockDoesNotExistAsync(expiredLock);
         }
 
         [Fact]
         public async Task Lock_WhenDisposingAfterNewLockWithSameKeyWasAcquired_OnlyNewLockExists()
         {
             // Arrange
-            var @firstLock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
-            await using var @secondLock = await this.LockSource.AcquireAsync(@firstLock.Key, DefaultTtl);
+            var previousLock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
+            await using var newLock = await this.LockSource.AcquireAsync(previousLock.Key, DefaultTtl);
 
             // Act
-            await @firstLock.DisposeAsync();
+            await previousLock.DisposeAsync();
 
             // Assert
-            await this.AssertLockDoesNotExistAsync(@firstLock);
-            await this.AssertLockExistsAsync(@secondLock);
+            await this.AssertLockDoesNotExistAsync(previousLock);
+            await this.AssertLockExistsAsync(newLock);
         }
         
         protected abstract Task<bool> LockExistsAsync(string key, Guid? id = null);
@@ -179,6 +185,15 @@ namespace LockDotNet.Tests
             Assert.False(
                 await this.LockExistsAsync(@lock),
                 customMessage ?? $"Did not expect lock {{ Key = {@lock.Key}, Id = {@lock.Id}}} to exist, but it was found.");
+        }
+
+        private async Task<Lock> SetupExpiredLockAsync()
+        {
+            var @lock = await this.LockSource.AcquireAsync(RandomKey, ShortTtl);
+
+            await Task.Delay(ShortTtl + TimeSpan.FromMilliseconds(100));
+
+            return @lock;
         }
     }
 }
