@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>LockDotNet.MongoDb</RootNamespace>
+    <AssemblyName>LockDotNet.MongoDb</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../LockDotNet/LockDotNet.csproj" />
+  </ItemGroup>
+
+</Project>
