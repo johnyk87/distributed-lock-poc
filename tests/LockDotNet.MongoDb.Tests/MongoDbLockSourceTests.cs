@@ -1,35 +1,43 @@
 namespace LockDotNet.MongoDb.Tests
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
+    using LockDotNet.Tests;
     using MongoDB.Bson;
     using MongoDB.Driver;
-    using Xunit;
 
-    public class MongoDbLockSourceTests
+    public class MongoDbLockSourceTests : BaseLockSourceTests
     {
-        [Fact]
-        public async Task AdHoc()
+        private static readonly IMongoDatabase Database = CreateDatabase();
+        private static readonly IMongoCollection<BsonDocument> Collection = CreateCollection();
+
+        public MongoDbLockSourceTests()
+            : base(new MongoDbLockSource(Database))
+        {
+        }
+
+        protected override async Task<bool> LockExistsAsync(string key, Guid? id = null)
+        {
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.Eq("LockKey", key) & filterBuilder.Gte("ExpirationDate", DateTime.UtcNow);
+
+            if (id.HasValue)
+            {
+                filter &= filterBuilder.Eq("LockId", id.ToString());
+            }
+
+            return await Collection.Find(filter).AnyAsync();
+        }
+
+        private static IMongoDatabase CreateDatabase()
         {
             var client = new MongoClient("mongodb://root:root@localhost:27017");
-            var database = client.GetDatabase("locks_tests");
-            var collection = database.GetCollection<BsonDocument>("locks");
-            
-            var lockSource = new MongoDbLockSource(database);
-            
-            await using var @lock1 = await lockSource.AcquireAsync("test", TimeSpan.FromSeconds(2));
-            var lock2Task = lockSource.AcquireAsync("test", TimeSpan.FromSeconds(2));
-            await Task.Delay(1000);
-            Assert.False(lock2Task.IsCompleted);
-            await @lock1.DisposeAsync();
-            await using var @lock2 = await lock2Task;
+            return client.GetDatabase("locks_tests");
+        }
 
-            var savedLock = (await collection.Find($"{{ LockKey: '{@lock1.Key}', _id: '{@lock1.Id}' }}").ToListAsync()).FirstOrDefault();
-            Assert.Null(savedLock);
-
-            savedLock = (await collection.Find($"{{ LockKey: '{@lock2.Key}', _id: '{@lock2.Id}' }}").ToListAsync()).FirstOrDefault();
-            Assert.NotNull(savedLock);
+        private static IMongoCollection<BsonDocument> CreateCollection()
+        {
+            return Database.GetCollection<BsonDocument>("locks");
         }
     }
 }

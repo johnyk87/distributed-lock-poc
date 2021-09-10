@@ -1,7 +1,6 @@
 ﻿namespace LockDotNet.MongoDb
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using LockDotNet;
@@ -33,13 +32,15 @@
             var lockId = Guid.NewGuid();
             var @lock = new LockEntity
             {
-                LockId = lockId,
                 LockKey = lockKey,
+                LockId = lockId,
             };
 
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                @lock.ExpirationDate = DateTime.UtcNow.Add(lockTtl);
 
                 if (await this.TryInsertLock(@lock))
                 {
@@ -69,15 +70,26 @@
                     return;
                 }
                 
-                await this.collection.Indexes.CreateOneAsync(
-                    new CreateIndexModel<LockEntity>(
-                        Builders<LockEntity>.IndexKeys.Ascending(l => l.LockKey),
-                        new CreateIndexOptions<LockEntity>
-                        {
-                            Name = "unique_lock_key",
-                            Background = false,
-                            Unique = true,
-                        }));
+                await this.collection.Indexes.CreateManyAsync(
+                    new[]
+                    {
+                        new CreateIndexModel<LockEntity>(
+                            Builders<LockEntity>.IndexKeys.Ascending(l => l.LockKey),
+                            new CreateIndexOptions<LockEntity>
+                            {
+                                Name = "unique_key",
+                                Background = false,
+                                Unique = true,
+                            }),
+                        new CreateIndexModel<LockEntity>(
+                            Builders<LockEntity>.IndexKeys.Ascending(l => l.ExpirationDate),
+                            new CreateIndexOptions<LockEntity>
+                            {
+                                Name = "expiration_ttl",
+                                Background = false,
+                                ExpireAfter = TimeSpan.Zero,
+                            }),
+                    });
 
                 this.isInitialized = true;
             }
@@ -91,7 +103,13 @@
         {
             try
             {
-                await this.collection.InsertOneAsync(@lock);
+                await this.collection.UpdateOneAsync<LockEntity>(
+                    l => l.LockKey == @lock.LockKey && l.ExpirationDate < DateTime.UtcNow,
+                    Builders<LockEntity>.Update
+                        .SetOnInsert(l => l.LockKey, @lock.LockKey)
+                        .Set(l => l.LockId, @lock.LockId)
+                        .Set(l => l.ExpirationDate, @lock.ExpirationDate),
+                    new UpdateOptions { IsUpsert = true });
 
                 return true;
             }
