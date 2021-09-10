@@ -33,7 +33,7 @@ namespace LockDotNet.Cassandra
             var lockId = Guid.NewGuid();
 
             var preparedStatement = await this.GetUpsertPreparedStatementAsync();
-            var boundStatement = preparedStatement.Bind(lockKey, lockId, (int)lockTtl.TotalSeconds);
+            var boundStatement = preparedStatement.Bind(lockKey, lockId, (int)Math.Ceiling(lockTtl.TotalSeconds));
 
             do
             {

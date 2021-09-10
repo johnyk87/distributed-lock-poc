@@ -9,6 +9,7 @@ namespace LockDotNet.Tests
     public abstract class BaseLockSourceTests
     {
         protected static readonly TimeSpan DefaultTtl = TimeSpan.FromSeconds(10);
+        // Warning: some lock sources may only support precision to the second, so don't use milliseconds for a short TTL.
         protected static readonly TimeSpan ShortTtl = TimeSpan.FromSeconds(1);
 
         protected static string RandomKey => Guid.NewGuid().ToString();
@@ -82,7 +83,7 @@ namespace LockDotNet.Tests
         {
             // Arrange
             var key = RandomKey;
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
             // Act
             var tasks = Enumerable
@@ -102,13 +103,11 @@ namespace LockDotNet.Tests
         public async Task AcquireAsync_WithCanceledToken_ThrowsOperationCanceledExceptionAndDoesNotAcquireLock()
         {
             // Arrange
-            using var cts = new CancellationTokenSource();
-            cts.Cancel();
-
             var key = RandomKey;
+            var ct = new CancellationToken(true);
 
             // Act
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(key, DefaultTtl, cts.Token));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(key, DefaultTtl, ct));
 
             // Assert
             await this.AssertLockDoesNotExistAsync(key);
@@ -120,7 +119,7 @@ namespace LockDotNet.Tests
             // Arrange
             await using var existingLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
             // Act
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(existingLock.Key, DefaultTtl, cts.Token));
