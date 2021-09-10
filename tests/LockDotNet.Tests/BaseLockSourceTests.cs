@@ -78,6 +78,27 @@ namespace LockDotNet.Tests
         }
 
         [Fact]
+        public async Task AcquireAsync_WithConcurrentCallsForSameKey_OnlyOneCallAcquiresTheLock()
+        {
+            // Arrange
+            var key = RandomKey;
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+
+            // Act
+            var tasks = Enumerable
+                .Range(1, 10)
+                .Select(_ => Task.Run(() => this.LockSource.AcquireAsync(key, DefaultTtl, cts.Token)))
+                .ToList();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Task.WhenAll(tasks));
+
+            // Assert
+            var successfulTask = Assert.Single(tasks.Where(t => t.IsCompletedSuccessfully));
+            var acquiredLock = await successfulTask;
+            await this.AssertLockExistsAsync(acquiredLock);
+        }
+
+        [Fact]
         public async Task AcquireAsync_WithCanceledToken_ThrowsOperationCanceledExceptionAndDoesNotAcquireLock()
         {
             // Arrange
