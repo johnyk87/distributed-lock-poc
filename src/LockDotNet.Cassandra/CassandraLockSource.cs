@@ -37,8 +37,6 @@ namespace LockDotNet.Cassandra
 
             do
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 var rowSet = await this.session.ExecuteAsync(boundStatement);
 
                 if (IsApplied(rowSet))

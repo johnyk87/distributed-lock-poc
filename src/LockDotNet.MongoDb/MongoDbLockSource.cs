@@ -38,8 +38,6 @@
 
             do
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 @lock.ExpirationDate = DateTime.UtcNow.Add(lockTtl);
 
                 if (await this.TryInsertLock(@lock))

@@ -100,17 +100,30 @@ namespace LockDotNet.Tests
         }
 
         [Fact]
-        public async Task AcquireAsync_WithCanceledToken_ThrowsOperationCanceledExceptionAndDoesNotAcquireLock()
+        public async Task AcquireAsync_WithCanceledTokenAndNoExistingLock_AcquiresLockOnFirstTryAndDoesNotThrow()
         {
             // Arrange
-            var key = RandomKey;
             var ct = new CancellationToken(true);
 
             // Act
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(key, DefaultTtl, ct));
+            await using var acquiredLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl, ct);
 
             // Assert
-            await this.AssertLockDoesNotExistAsync(key);
+            await this.AssertLockExistsAsync(acquiredLock);
+        }
+
+        [Fact]
+        public async Task AcquireAsync_WithCanceledTokenAndExistingLock_ThrowsOperationCanceledExceptionAndExistingLockSurvives()
+        {
+            // Arrange
+            await using var existingLock = await this.LockSource.AcquireAsync(RandomKey, DefaultTtl);
+            var ct = new CancellationToken(true);
+
+            // Act
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => this.LockSource.AcquireAsync(existingLock.Key, DefaultTtl, ct));
+
+            // Assert
+            await this.AssertLockExistsAsync(existingLock);
         }
 
         [Fact]
