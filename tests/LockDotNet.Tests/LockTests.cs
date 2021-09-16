@@ -75,22 +75,15 @@ namespace LockDotNet.Tests
         }
 
         [Fact]
-        public async Task DisposeAsync_WithReleaseException_ThrowsLockReleaseExceptionWithMessageAndInnerException()
+        public async Task DisposeAsync_WithReleaseException_DoesNotThrowException()
         {
             // Arrange
-            var expectedErrorMessage = $"Failed to release lock with key \"{TestKey}\" and id \"{TestId}\".";
-            var expectedInnerException = new Exception("Oops");
-            
-            var @lock = new Lock(TestKey, TestId, _ => throw expectedInnerException);
+            var exception = new Exception("Oops");
+            var @lock = new Lock(TestKey, TestId, _ => throw exception);
 
             // Act
-            var actualException = await Assert.ThrowsAsync<LockReleaseException>(async () => await @lock.DisposeAsync());
-
-            // Assert
-            Assert.Equal(expectedErrorMessage, actualException.Message);
-            Assert.Equal(expectedInnerException, actualException.InnerException);
+            await @lock.DisposeAsync();
         }
-        
 
         [Fact]
         public async Task DisposeAsync_WithReleaseExceptionOnFirstTry_CanStillReleaseOnSecondAttempt()
@@ -111,7 +104,7 @@ namespace LockDotNet.Tests
             var @lock = new Lock(TestKey, TestId, ReleaseDelegate);
 
             // Act
-            await Assert.ThrowsAsync<LockReleaseException>(async () => await @lock.DisposeAsync());
+            await @lock.DisposeAsync();
             await @lock.DisposeAsync();
 
             // Assert

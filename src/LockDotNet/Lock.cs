@@ -33,9 +33,10 @@ namespace LockDotNet
                 await this.releaseDelegate(this);
                 this.disposed = true;    
             }
-            catch (Exception ex)
+            catch
             {
-                throw new LockReleaseException($"Failed to release lock with key \"{this.Key}\" and id \"{this.Id}\".", ex);
+                // Ignore. Dispose methods are not expected to throw exceptions.
+                // https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1065
             }
         }
     }
