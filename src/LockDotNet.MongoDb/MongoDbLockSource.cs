@@ -27,6 +27,16 @@
         public async Task<Lock> AcquireAsync(
             string lockKey, TimeSpan lockTtl, CancellationToken cancellationToken = default)
         {
+            if (lockKey is null)
+            {
+                throw new ArgumentNullException(nameof(lockKey));
+            }
+
+            if (lockTtl <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(lockTtl), "The lock TTL must be greater than `TimeSpan.Zero`.");
+            }
+
             await this.InitializeAsync();
 
             var lockId = Guid.NewGuid();

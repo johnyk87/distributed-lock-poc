@@ -22,6 +22,31 @@ namespace LockDotNet.Tests
         protected ILockSource LockSource { get; }
 
         [Fact]
+        public async Task AcquireAsync_WithNullLockKey_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => this.LockSource.AcquireAsync(null, DefaultTtl));
+        }
+
+        [Theory]
+        [InlineData(-100)]
+        [InlineData(-1)]
+        [InlineData(0)]
+        public async Task AcquireAsync_WithNegativeOrZeroLockTtl_ThrowsArgumentOutOfRangeException(
+            int lockTtlMilliseconds)
+        {
+            // Arrange
+            const string expectedMessage = "The lock TTL must be greater than `TimeSpan.Zero`.";
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+                () => this.LockSource.AcquireAsync(RandomKey, TimeSpan.FromMilliseconds(lockTtlMilliseconds)));
+            
+            // Assert
+            Assert.Contains(expectedMessage, exception.Message);
+        }
+
+        [Fact]
         public async Task AcquireAsync_WithNoLockForTheSameKey_ReturnsValidLockInstance()
         {
             // Arrange
